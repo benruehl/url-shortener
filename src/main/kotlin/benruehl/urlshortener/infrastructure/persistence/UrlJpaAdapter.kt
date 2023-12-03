@@ -42,7 +42,7 @@ class UrlJpaAdapter(
 
         return Url(
             originalUrl = entity.get().originalUrl!!,
-            shortId = shortIdGenerator.encode(entity.get().entityId!!)
+            shortId = shortId
         )
     }
 }
