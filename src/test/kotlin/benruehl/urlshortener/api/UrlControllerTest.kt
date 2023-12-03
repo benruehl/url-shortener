@@ -27,10 +27,10 @@ class UrlControllerTest(
     @Test
     fun `post should return ok and short id`() {
         val shortId = "abcdef"
-        val originalId = "https://dkbcodefactory.com/"
-        val requestContent = UrlRequest(originalId)
+        val originalUrl = "https://dkbcodefactory.com/"
+        val requestContent = UrlRequest(originalUrl)
 
-        every { repository.save(originalId) } returns Url(shortId = shortId, originalUrl = originalId);
+        every { repository.save(originalUrl) } returns Url(shortId = shortId, originalUrl = originalUrl)
 
         mockMvc.perform(post("/u")
                 .content(mapper.writeValueAsString(requestContent))
@@ -43,12 +43,12 @@ class UrlControllerTest(
     @Test
     fun `get should return redirect to original url`() {
         val shortId = "abcdef"
-        val originalId = "https://dkbcodefactory.com/"
+        val originalUrl = "https://dkbcodefactory.com/"
 
-        every { repository.findByShortId(shortId) } returns Url(shortId = shortId, originalUrl = originalId);
+        every { repository.findByShortId(shortId) } returns Url(shortId = shortId, originalUrl = originalUrl)
 
         mockMvc.perform(get("/u/$shortId"))
             .andExpect(status().`is`(302))
-            .andExpect(redirectedUrl(originalId))
+            .andExpect(redirectedUrl(originalUrl))
     }
 }
