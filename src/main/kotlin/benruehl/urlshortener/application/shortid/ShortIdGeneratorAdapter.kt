@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ShortIdGeneratorAdapter(
-    @Value("\${hashids.salt}") val hashidsSalt: String
+    @Value("\${hashids.salt}") final val hashidsSalt: String
 ) : ShortIdGenerator {
 
     private val hashids = Hashids(hashidsSalt, 6)

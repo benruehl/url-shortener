@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import java.util.NoSuchElementException
 
 @WebMvcTest
 class UrlControllerTest(
@@ -41,14 +42,24 @@ class UrlControllerTest(
     }
 
     @Test
-    fun `get should return redirect to original url`() {
+    fun `get should return redirect to original url when id exists`() {
         val shortId = "abcdef"
         val originalUrl = "https://dkbcodefactory.com/"
 
         every { repository.findByShortId(shortId) } returns Url(shortId = shortId, originalUrl = originalUrl)
 
         mockMvc.perform(get("/u/$shortId"))
-            .andExpect(status().`is`(302))
+            .andExpect(status().is3xxRedirection)
             .andExpect(redirectedUrl(originalUrl))
+    }
+
+    @Test
+    fun `get should return not found when id does not exist`() {
+        val shortId = "abcdef"
+
+        every { repository.findByShortId(shortId) } throws NoSuchElementException()
+
+        mockMvc.perform(get("/u/$shortId"))
+                .andExpect(status().isNotFound)
     }
 }
