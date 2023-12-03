@@ -2,36 +2,47 @@ package benruehl.urlshortener.infrastructure.persistence
 
 import benruehl.urlshortener.domain.entities.Url
 import benruehl.urlshortener.domain.repositories.UrlRepository
+import benruehl.urlshortener.domain.services.ShortIdGenerator
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import java.util.NoSuchElementException
 
 @Repository
 class UrlJpaAdapter(
-    var repository: UrlJpaRepository
+    val repository: UrlJpaRepository,
+    val shortIdGenerator: ShortIdGenerator,
 ) : UrlRepository {
+
     override fun save(originalUrl: String): Url {
         val entity = repository.save(UrlEntity(
             originalUrl = originalUrl
         ))
         return Url(
             originalUrl = originalUrl,
-            shortId = entity.entityId.toString()
+            shortId = shortIdGenerator.encode(entity.entityId!!)
         )
     }
 
     override fun findByShortId(shortId: String): Url {
-        val entity = repository.findById(shortId.toLong())
-        if (entity.isEmpty) {
-            throw NoSuchElementException("Url entity with id $shortId does not exist")
+        val entityId: Long
+        try {
+            entityId = shortIdGenerator.decode(shortId)
+        } catch (e: Exception) {
+            throw NoSuchElementException("Short id $shortId could not be decoded.")
         }
+
+        val entity = repository.findById(entityId)
+
+        if (entity.isEmpty) {
+            throw NoSuchElementException("Url entity with id $shortId does not exist.")
+        }
+
         return Url(
             originalUrl = entity.get().originalUrl!!,
-            shortId = entity.get().entityId.toString()
+            shortId = shortIdGenerator.encode(entity.get().entityId!!)
         )
     }
 }
