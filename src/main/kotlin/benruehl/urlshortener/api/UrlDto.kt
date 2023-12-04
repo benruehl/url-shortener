@@ -1,5 +1,10 @@
 package benruehl.urlshortener.api
 
-data class UrlRequest(val originalUrl: String)
+// Create Url
+data class UrlCreateRequest(val originalUrl: String)
+data class UrlCreateResponse(val shortId: String)
 
-data class UrlResponse(val shortId: String)
+
+// Read Url
+data class UrlReadResponse(val originalUrl: String)
+

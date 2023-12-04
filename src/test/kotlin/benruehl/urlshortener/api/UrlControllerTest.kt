@@ -29,7 +29,7 @@ class UrlControllerTest(
     fun `post should return ok and short id`() {
         val shortId = "abcdef"
         val originalUrl = "https://dkbcodefactory.com/"
-        val requestContent = UrlRequest(originalUrl)
+        val requestContent = UrlCreateRequest(originalUrl)
 
         every { repository.save(originalUrl) } returns Url(shortId = shortId, originalUrl = originalUrl)
 
@@ -60,6 +60,29 @@ class UrlControllerTest(
         every { repository.findByShortId(shortId) } throws NoSuchElementException()
 
         mockMvc.perform(get("/u/$shortId"))
+                .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `get raw should return ok and original url when id exists`() {
+        val shortId = "abcdef"
+        val originalUrl = "https://dkbcodefactory.com/"
+
+        every { repository.findByShortId(shortId) } returns Url(shortId = shortId, originalUrl = originalUrl)
+
+        mockMvc.perform(get("/u/$shortId/raw"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.originalUrl").value(originalUrl))
+    }
+
+    @Test
+    fun `get raw should return not found when id does not exist`() {
+        val shortId = "abcdef"
+
+        every { repository.findByShortId(shortId) } throws NoSuchElementException()
+
+        mockMvc.perform(get("/u/$shortId/raw"))
                 .andExpect(status().isNotFound)
     }
 }

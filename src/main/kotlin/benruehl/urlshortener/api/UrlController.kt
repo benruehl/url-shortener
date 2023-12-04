@@ -11,14 +11,20 @@ class UrlController(
 ) {
 
     @PostMapping
-    fun shortenUrl(@RequestBody url: UrlRequest): UrlResponse {
+    fun shortenUrl(@RequestBody url: UrlCreateRequest): UrlCreateResponse {
         val savedUrl = repository.save(url.originalUrl)
-        return UrlResponse(shortId = savedUrl.shortId)
+        return UrlCreateResponse(shortId = savedUrl.shortId)
     }
 
     @GetMapping("/{shortId}")
     fun redirectToOriginal(@PathVariable shortId: String): RedirectView {
         val savedUrl = repository.findByShortId(shortId)
         return RedirectView(savedUrl.originalUrl)
+    }
+
+    @GetMapping("/{shortId}/raw")
+    fun getOriginal(@PathVariable shortId: String): UrlReadResponse {
+        val savedUrl = repository.findByShortId(shortId)
+        return UrlReadResponse(originalUrl = savedUrl.originalUrl)
     }
 }
